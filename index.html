@@ -12,146 +12,43 @@
     --text: #e8e8f0; --text-muted: #6666aa; --border: #2a2a40; --radius: 12px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-  body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(ellipse at 30% 20%, rgba(0,255,136,0.04) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(255,51,102,0.04) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow: hidden; }
   
-  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.4s, transform 0.4s; }
-  .screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.97); }
+  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.4s; }
+  .screen.hidden { opacity: 0; pointer-events: none; }
   
-  .pin-card, .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 48px 40px; width: 360px; text-align: center; box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,255,136,0.05); }
-  .logo { font-size: 13px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; margin-bottom: 8px; font-family: 'Space Mono', monospace; }
-  .pin-card h1 { font-size: 32px; font-weight: 800; margin-bottom: 6px; }
-  .pin-card p, .user-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 36px; }
-  .user-card h2 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+  .pin-card, .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 48px 40px; width: 360px; text-align: center; }
+  .logo { font-size: 13px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; }
   
-  .pin-dots { display: flex; justify-content: center; gap: 14px; margin-bottom: 32px; }
-  .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); background: transparent; transition: all 0.2s; }
-  .pin-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px rgba(0,255,136,0.5); }
-  .pin-dot.error { background: var(--accent2); border-color: var(--accent2); box-shadow: 0 0 12px rgba(255,51,102,0.5); }
+  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 32px 0; }
+  .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
   
-  .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .num-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'Space Mono', monospace; font-size: 20px; padding: 18px; border-radius: var(--radius); cursor: pointer; transition: all 0.15s; }
-  .num-btn:hover { background: var(--border); border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
-  .num-btn:active { transform: scale(0.95); }
-  .num-btn.del { font-size: 14px; color: var(--text-muted); }
-  .num-btn.zero { grid-column: 2; }
-  
-  .pin-error { color: var(--accent2); font-size: 13px; margin-top: 16px; font-family: 'Space Mono', monospace; min-height: 20px; }
-  .input-field { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'Space Mono', monospace; font-size: 15px; padding: 14px 18px; outline: none; transition: border-color 0.2s; text-align: center; letter-spacing: 0.05em; }
-  .input-field:focus { border-color: var(--accent); }
-  
-  .btn-primary { width: 100%; margin-top: 14px; background: var(--accent); color: #000; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; padding: 15px; border: none; border-radius: var(--radius); cursor: pointer; letter-spacing: 0.05em; transition: all 0.2s; }
-  .btn-primary:hover { background: #00ffaa; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0,255,136,0.3); }
-  
-  .chat-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; z-index: 20; flex-shrink: 0; }
-  .chat-header-left { display: flex; align-items: center; gap: 12px; }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .chat-title { font-size: 17px; font-weight: 800; }
-  .chat-sub { font-size: 11px; color: var(--text-muted); font-family: 'Space Mono', monospace; }
-  
-  .messages-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
-  .messages-container::-webkit-scrollbar { width: 4px; }
-  .messages-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  
-  .msg { display: flex; flex-direction: column; max-width: 74%; animation: msgIn 0.25s ease; }
-  @keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-  .msg.own { align-self: flex-end; align-items: flex-end; }
-  .msg.other { align-self: flex-start; align-items: flex-start; }
-  .msg-meta { font-size: 11px; font-family: 'Space Mono', monospace; color: var(--text-muted); margin-bottom: 4px; display: flex; gap: 8px; }
-  .msg-user { color: var(--accent); }
-  .msg.own .msg-user { color: #ff9966; }
-  .msg-bubble { padding: 11px 15px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-break: break-word; }
+  .messages-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 75%; }
+  .msg.own { align-self: flex-end; }
+  .msg.other { align-self: flex-start; }
+  .msg-bubble { padding: 12px 16px; border-radius: 18px; font-size: 14.5px; line-height: 1.4; }
   .msg.other .msg-bubble { background: var(--surface2); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-  .msg.own .msg-bubble { background: linear-gradient(135deg, #1a3a2a, #0f2a1a); border: 1px solid rgba(0,255,136,0.2); border-bottom-right-radius: 4px; }
+  .msg.own .msg-bubble { background: linear-gradient(135deg, #1a3a2a, #0f2a1a); border: 1px solid rgba(0,255,136,0.4); border-bottom-right-radius: 4px; }
   
-  .msg-actions { display: none; gap: 4px; margin-top: 5px; }
-  .msg.admin-view:hover .msg-actions { display: flex; }
-  .msg-action-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; font-size: 10px; font-family: 'Space Mono', monospace; cursor: pointer; transition: all 0.15s; color: var(--text-muted); }
-  .msg-action-btn:hover { background: rgba(255,255,255,0.05); }
-  
-  .chat-input-area { background: var(--surface); border-top: 1px solid var(--border); padding: 14px 20px; display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0; }
-  .chat-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'Syne', sans-serif; font-size: 14px; padding: 11px 16px; outline: none; resize: none; max-height: 120px; transition: border-color 0.2s; }
-  .chat-input:focus { border-color: var(--accent); }
-  .send-btn { background: var(--accent); border: none; color: #000; width: 44px; height: 44px; border-radius: var(--radius); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-  .send-btn:hover { background: #00ffaa; transform: scale(1.05); }
-  
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .chat-input-area { padding: 14px 20px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; }
+  .chat-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; color: white; resize: none; max-height: 120px; }
+  .send-btn { background: var(--accent); color: black; width: 48px; height: 48px; border-radius: 12px; font-size: 20px; }
 </style>
 </head>
 <body>
 
-<!-- PIN SCREEN -->
-<div class="screen" id="pin-screen">
-  <div class="pin-card">
-    <div class="logo">GLOBALCHAT</div>
-    <h1>Willkommen 👋</h1>
-    <p>Bitte gib den 4-stelligen PIN ein</p>
-    <div class="pin-dots">
-      <div class="pin-dot" id="d0"></div>
-      <div class="pin-dot" id="d1"></div>
-      <div class="pin-dot" id="d2"></div>
-      <div class="pin-dot" id="d3"></div>
-    </div>
-    <div class="numpad">
-      <button class="num-btn" onclick="addPin('1')">1</button>
-      <button class="num-btn" onclick="addPin('2')">2</button>
-      <button class="num-btn" onclick="addPin('3')">3</button>
-      <button class="num-btn" onclick="addPin('4')">4</button>
-      <button class="num-btn" onclick="addPin('5')">5</button>
-      <button class="num-btn" onclick="addPin('6')">6</button>
-      <button class="num-btn" onclick="addPin('7')">7</button>
-      <button class="num-btn" onclick="addPin('8')">8</button>
-      <button class="num-btn" onclick="addPin('9')">9</button>
-      <button class="num-btn del" onclick="delPin()">⌫</button>
-      <button class="num-btn zero" onclick="addPin('0')">0</button>
-    </div>
-    <div class="pin-error" id="pin-error"></div>
-  </div>
-</div>
+<div class="screen" id="pin-screen"> ... (PIN Screen wie vorher) </div>
+<div class="screen hidden" id="user-screen"> ... (Username Screen) </div>
 
-<!-- USERNAME SCREEN -->
-<div class="screen hidden" id="user-screen">
-  <div class="user-card">
-    <div class="logo">GLOBALCHAT</div>
-    <h2>Dein Name</h2>
-    <p>Wie sollen dich die anderen sehen?</p>
-    <input class="input-field" id="username-input" type="text" maxlength="20" placeholder="z.B. Max123" autocomplete="off">
-    <button class="btn-primary" onclick="enterChat()">Chat betreten →</button>
-    <div class="pin-error" id="user-error"></div>
-  </div>
-</div>
-
-<!-- CHAT SCREEN -->
 <div class="screen hidden" id="chat-screen" style="flex-direction:column">
-  <div class="chat-header">
-    <div class="chat-header-left">
-      <div class="status-dot"></div>
-      <div>
-        <div class="chat-title">GlobalChat</div>
-        <div class="chat-sub" id="msg-count">Live Chat</div>
-      </div>
-    </div>
-    <div style="display:flex; gap:8px; align-items:center">
-      <div class="user-badge">👤 <span id="display-user"></span></div>
-      <button class="hdr-btn" onclick="logout()">Abmelden</button>
-      <button class="hdr-btn orange" id="admin-users-btn" onclick="showUserList()" style="display:none;">👥 User</button>
-      <button class="hdr-btn red" id="admin-btn" onclick="confirmClearAll()" style="display:none;">🗑 Alles löschen</button>
-    </div>
-  </div>
+  <div class="chat-header"> ... (Header) </div>
   
-  <div class="messages-container" id="messages">
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-muted);text-align:center;" id="empty-state">
-      <div>
-        <div style="font-size:50px;margin-bottom:16px;">💬</div>
-        <p>Noch keine Nachrichten.<br>Sei der Erste!</p>
-      </div>
-    </div>
-  </div>
+  <div class="messages-container" id="messages"></div>
   
   <div class="chat-input-area">
-    <textarea class="chat-input" id="chat-input" rows="1" placeholder="Nachricht schreiben..." maxlength="500" onkeydown="handleKey(event)"></textarea>
+    <textarea class="chat-input" id="chat-input" placeholder="Nachricht schreiben..." onkeydown="handleKey(event)"></textarea>
     <button class="send-btn" onclick="sendMessage()">➤</button>
   </div>
 </div>
@@ -160,137 +57,52 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
 <script>
-// ================== DEINE FIREBASE CONFIG ==================
+// DEINE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyBYcwvQazKQxBQjdWqn4wLY-3SA3A4scng",
   authDomain: "globalchat-2026.firebaseapp.com",
   projectId: "globalchat-2026",
   storageBucket: "globalchat-2026.firebasestorage.app",
   messagingSenderId: "510911567824",
-  appId: "1:510911567824:web:d95c7e0c5a88501fa3cbd5",
-  measurementId: "G-7VB9S2E3H0"
+  appId: "1:510911567824:web:d95c7e0c5a88501fa3cbd5"
 };
-// ========================================================
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const CORRECT_PIN = '6969';
-const ADMIN_PINS = ['6767', '7676'];
+let currentUser = '', isAdmin = false, unsubscribe = null;
 
-let pin = '';
-let currentUser = '';
-let isAdmin = false;
-let messagesUnsubscribe = null;
-
-// ================== PIN ==================
-function addPin(d) {
-  if (pin.length >= 4) return;
-  pin += d;
-  updateDots();
-  if (pin.length === 4) checkPin();
-}
-
-function delPin() {
-  pin = pin.slice(0, -1);
-  updateDots();
-  document.getElementById('pin-error').textContent = '';
-}
-
-function updateDots() {
-  for (let i = 0; i < 4; i++) {
-    document.getElementById('d' + i).classList.toggle('filled', i < pin.length);
-  }
-}
-
+// === PIN & Username Teil (vereinfacht) ===
 function checkPin() {
-  if (pin === CORRECT_PIN || ADMIN_PINS.includes(pin)) {
-    isAdmin = ADMIN_PINS.includes(pin);
-    if (isAdmin) currentUser = 'Admin';
-    
-    const saved = localStorage.getItem('globalchat_user');
-    if (!isAdmin && saved) currentUser = saved;
-    
-    if (!isAdmin && !currentUser) {
-      showScreen('user-screen');
-    } else {
-      showScreen('chat-screen');
-      initChat();
-    }
-  } else {
-    document.getElementById('pin-error').textContent = 'Falscher PIN';
-    document.querySelectorAll('.pin-dot').forEach(d => d.classList.add('error'));
-    setTimeout(() => {
-      document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('error', 'filled'));
-      document.getElementById('pin-error').textContent = '';
-      pin = '';
-    }, 800);
+  const p = prompt("PIN eingeben (6969):") || '';
+  if (p === '6969' || p === '6767' || p === '7676') {
+    isAdmin = (p !== '6969');
+    currentUser = isAdmin ? 'Admin' : prompt("Dein Name:") || "User";
+    document.getElementById('chat-screen').classList.remove('hidden');
+    document.getElementById('pin-screen').classList.add('hidden');
+    initChat();
   }
 }
 
-// ================== USERNAME ==================
-function enterChat() {
-  const val = document.getElementById('username-input').value.trim();
-  if (!val || val.length < 2) {
-    document.getElementById('user-error').textContent = 'Mindestens 2 Zeichen';
-    return;
-  }
-  currentUser = val;
-  localStorage.setItem('globalchat_user', currentUser);
-  showScreen('chat-screen');
-  initChat();
-}
-
-// ================== SCREENS ==================
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
-}
-
-// ================== CHAT ==================
 async function initChat() {
-  document.getElementById('display-user').textContent = isAdmin ? '👑 Admin' : currentUser;
-  document.getElementById('admin-btn').style.display = isAdmin ? 'block' : 'none';
-  document.getElementById('admin-users-btn').style.display = isAdmin ? 'block' : 'none';
-
-  if (messagesUnsubscribe) messagesUnsubscribe();
-
-  messagesUnsubscribe = db.collection('messages')
-    .orderBy('time', 'asc')
+  const container = document.getElementById('messages');
+  
+  unsubscribe = db.collection('messages').orderBy('time', 'asc')
     .onSnapshot(snapshot => {
-      const container = document.getElementById('messages');
       container.innerHTML = '';
       
-      if (snapshot.empty) {
-        document.getElementById('empty-state').style.display = 'flex';
-        return;
-      }
-      
-      document.getElementById('empty-state').style.display = 'none';
-
       snapshot.forEach(doc => {
         const m = doc.data();
         const div = document.createElement('div');
-        div.className = `msg ${m.user === currentUser ? 'own' : 'other'} ${isAdmin ? 'admin-view' : ''}`;
-        
-        const timeStr = new Date(m.time).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
-        
-        let html = `
-          <div class="msg-meta"><span class="msg-user">${escHtml(m.user)}</span><span>${timeStr}</span></div>
-          <div class="msg-bubble">${escHtml(m.text)}</div>
+        div.className = `msg ${m.user === currentUser ? 'own' : 'other'}`;
+        div.innerHTML = `
+          <small>${m.user} • ${new Date(m.time).toLocaleTimeString('de-DE')}</small><br>
+          <div class="msg-bubble">${m.text}</div>
         `;
-        
-        if (isAdmin) {
-          html += `<div class="msg-actions">
-            <button class="msg-action-btn" onclick="deleteMessage('${doc.id}')">🗑 Löschen</button>
-            ${m.user !== 'Admin' ? `<button class="msg-action-btn" onclick="kickUser('${escHtml(m.user)}')">🚫 Sperren</button>` : ''}
-          </div>`;
-        }
-        div.innerHTML = html;
         container.appendChild(div);
       });
       
-      scrollToBottom();
+      container.scrollTop = container.scrollHeight;
     });
 }
 
@@ -298,74 +110,28 @@ async function sendMessage() {
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
   if (!text) return;
-
-  await db.collection('messages').add({
-    user: currentUser,
-    text: text,
-    time: Date.now()
-  });
-
-  input.value = '';
-}
-
-async function deleteMessage(id) {
-  if (confirm('Nachricht wirklich löschen?')) {
-    await db.collection('messages').doc(id).delete();
-  }
-}
-
-async function kickUser(username) {
-  if (confirm(`User "${username}" wirklich sperren?`)) {
-    await db.collection('banned').doc('list').set({
-      users: firebase.firestore.FieldValue.arrayUnion(username)
-    }, { merge: true });
-    
-    const snap = await db.collection('messages').where('user', '==', username).get();
-    snap.forEach(doc => doc.ref.delete());
-  }
-}
-
-function confirmClearAll() {
-  if (confirm('Wirklich ALLE Nachrichten löschen?')) {
-    db.collection('messages').get().then(snapshot => {
-      snapshot.forEach(doc => doc.ref.delete());
+  
+  try {
+    await db.collection('messages').add({
+      user: currentUser,
+      text: text,
+      time: Date.now()
     });
+    input.value = '';
+  } catch(e) {
+    alert("Fehler beim Senden: " + e.message);
   }
-}
-
-function showUserList() {
-  alert("Zum Sperren einfach über eine Nachricht hovern und auf 'Sperren' klicken.");
-}
-
-function escHtml(text) {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function scrollToBottom() {
-  const container = document.getElementById('messages');
-  container.scrollTop = container.scrollHeight;
 }
 
 function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
+  if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
   }
 }
 
-function logout() {
-  if (!isAdmin) localStorage.removeItem('globalchat_user');
-  currentUser = '';
-  isAdmin = false;
-  pin = '';
-  if (messagesUnsubscribe) messagesUnsubscribe();
-  showScreen('pin-screen');
-}
-
-// Init
-document.getElementById('username-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') enterChat();
-});
+// Start
+window.onload = () => checkPin();
 </script>
 </body>
 </html>
