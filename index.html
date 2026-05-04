@@ -2,53 +2,86 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>GlobalChat</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26;
     --accent: #00ff88; --accent2: #ff3366; --warn: #ffaa00;
-    --text: #e8e8f0; --text-muted: #6666aa; --border: #2a2a40; --radius: 12px;
+    --text: #e8e8f0; --text-muted: #6666aa; --border: #2a2a40;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow: hidden; }
   
-  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; transition: opacity 0.4s; }
+  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 10; }
   .screen.hidden { opacity: 0; pointer-events: none; }
   
-  .pin-card, .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 48px 40px; width: 360px; text-align: center; }
-  .logo { font-size: 13px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; }
+  .pin-card, .user-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 40px 30px; width: 92%; max-width: 380px; text-align: center; }
   
-  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 32px 0; }
-  .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); }
-  .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+  .chat-screen { flex-direction: column; }
+  .chat-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+  .messages-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--bg); }
   
-  .messages-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-  .msg { max-width: 75%; }
+  .msg { max-width: 85%; animation: fadeIn 0.2s; }
   .msg.own { align-self: flex-end; }
   .msg.other { align-self: flex-start; }
-  .msg-bubble { padding: 12px 16px; border-radius: 18px; font-size: 14.5px; line-height: 1.4; }
-  .msg.other .msg-bubble { background: var(--surface2); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-  .msg.own .msg-bubble { background: linear-gradient(135deg, #1a3a2a, #0f2a1a); border: 1px solid rgba(0,255,136,0.4); border-bottom-right-radius: 4px; }
+  .msg-bubble { padding: 13px 17px; border-radius: 18px; font-size: 15.5px; line-height: 1.45; word-break: break-word; }
+  .msg.other .msg-bubble { background: var(--surface2); border: 1px solid var(--border); border-bottom-left-radius: 5px; }
+  .msg.own .msg-bubble { background: linear-gradient(135deg, #1a3a2a, #0f2a1a); border: 1px solid rgba(0,255,136,0.35); border-bottom-right-radius: 5px; }
   
-  .chat-input-area { padding: 14px 20px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px; }
-  .chat-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; color: white; resize: none; max-height: 120px; }
-  .send-btn { background: var(--accent); color: black; width: 48px; height: 48px; border-radius: 12px; font-size: 20px; }
+  .chat-input-area { background: var(--surface); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 10px; align-items: flex-end; }
+  .chat-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 16px; color: var(--text); padding: 14px 18px; font-size: 16px; resize: none; max-height: 140px; }
+  .send-btn { background: var(--accent); color: #000; width: 52px; height: 52px; border-radius: 16px; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+  
+  .msg-actions button { font-size: 11px; padding: 4px 10px; margin-top: 4px; }
 </style>
 </head>
 <body>
 
-<div class="screen" id="pin-screen"> ... (PIN Screen wie vorher) </div>
-<div class="screen hidden" id="user-screen"> ... (Username Screen) </div>
+<!-- PIN SCREEN -->
+<div class="screen" id="pin-screen">
+  <div class="pin-card">
+    <div style="color:#00ff88; font-size:13px; letter-spacing:3px; margin-bottom:8px;">GLOBALCHAT</div>
+    <h1>Willkommen 👋</h1>
+    <p>4-stelliger PIN</p>
+    <div style="display:flex; justify-content:center; gap:12px; margin:30px 0;" id="pin-dots">
+      <div class="pin-dot" style="width:18px;height:18px;border:2px solid #2a2a40;border-radius:50%;"></div>
+      <div class="pin-dot" style="width:18px;height:18px;border:2px solid #2a2a40;border-radius:50%;"></div>
+      <div class="pin-dot" style="width:18px;height:18px;border:2px solid #2a2a40;border-radius:50%;"></div>
+      <div class="pin-dot" style="width:18px;height:18px;border:2px solid #2a2a40;border-radius:50%;"></div>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; max-width:280px; margin:0 auto;">
+      <!-- Nummern-Buttons hier (kannst du aus der alten Version kopieren oder ich mache später) -->
+    </div>
+  </div>
+</div>
 
-<div class="screen hidden" id="chat-screen" style="flex-direction:column">
-  <div class="chat-header"> ... (Header) </div>
+<!-- USER SCREEN -->
+<div class="screen hidden" id="user-screen">
+  <div class="user-card">
+    <div style="color:#00ff88; font-size:13px; letter-spacing:3px;">GLOBALCHAT</div>
+    <h2>Dein Name</h2>
+    <input id="username-input" class="chat-input" style="margin:20px 0; text-align:center;" placeholder="z.B. Max123" maxlength="20">
+    <button onclick="enterChat()" style="width:100%; padding:16px; background:#00ff88; color:black; border:none; border-radius:16px; font-weight:700;">Chat betreten</button>
+  </div>
+</div>
+
+<!-- CHAT SCREEN -->
+<div class="screen hidden chat-screen" id="chat-screen">
+  <div class="chat-header">
+    <div>GlobalChat <span style="color:#00ff88;">●</span></div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span id="display-user" style="font-size:14px;"></span>
+      <button onclick="logout()" style="background:none; border:1px solid #444; color:#aaa; padding:6px 12px; border-radius:10px;">Abmelden</button>
+      <button id="admin-clear" onclick="confirmClearAll()" style="display:none; background:#ff3366; color:white; border:none; padding:6px 12px; border-radius:10px;">Alles löschen</button>
+    </div>
+  </div>
   
   <div class="messages-container" id="messages"></div>
   
   <div class="chat-input-area">
-    <textarea class="chat-input" id="chat-input" placeholder="Nachricht schreiben..." onkeydown="handleKey(event)"></textarea>
+    <textarea id="chat-input" class="chat-input" placeholder="Nachricht schreiben..." maxlength="500" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
     <button class="send-btn" onclick="sendMessage()">➤</button>
   </div>
 </div>
@@ -57,7 +90,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
 <script>
-// DEINE CONFIG
+// Deine Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBYcwvQazKQxBQjdWqn4wLY-3SA3A4scng",
   authDomain: "globalchat-2026.firebaseapp.com",
@@ -70,68 +103,84 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-let currentUser = '', isAdmin = false, unsubscribe = null;
-
-// === PIN & Username Teil (vereinfacht) ===
-function checkPin() {
-  const p = prompt("PIN eingeben (6969):") || '';
-  if (p === '6969' || p === '6767' || p === '7676') {
-    isAdmin = (p !== '6969');
-    currentUser = isAdmin ? 'Admin' : prompt("Dein Name:") || "User";
-    document.getElementById('chat-screen').classList.remove('hidden');
-    document.getElementById('pin-screen').classList.add('hidden');
-    initChat();
-  }
-}
+let currentUser = "", isAdmin = false, unsubscribe = null;
 
 async function initChat() {
-  const container = document.getElementById('messages');
-  
-  unsubscribe = db.collection('messages').orderBy('time', 'asc')
-    .onSnapshot(snapshot => {
-      container.innerHTML = '';
+  document.getElementById('display-user').textContent = isAdmin ? "👑 Admin" : currentUser;
+  document.getElementById('admin-clear').style.display = isAdmin ? "block" : "none";
+
+  if (unsubscribe) unsubscribe();
+
+  unsubscribe = db.collection("messages").orderBy("time", "asc").onSnapshot(snapshot => {
+    const container = document.getElementById("messages");
+    container.innerHTML = "";
+    
+    snapshot.forEach(doc => {
+      const m = doc.data();
+      const div = document.createElement("div");
+      div.className = `msg ${m.user === currentUser ? "own" : "other"}`;
+      const time = new Date(m.time).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
       
-      snapshot.forEach(doc => {
-        const m = doc.data();
-        const div = document.createElement('div');
-        div.className = `msg ${m.user === currentUser ? 'own' : 'other'}`;
-        div.innerHTML = `
-          <small>${m.user} • ${new Date(m.time).toLocaleTimeString('de-DE')}</small><br>
-          <div class="msg-bubble">${m.text}</div>
-        `;
-        container.appendChild(div);
-      });
-      
-      container.scrollTop = container.scrollHeight;
+      div.innerHTML = `
+        <div style="font-size:12px; opacity:0.7; margin-bottom:3px;">${m.user} • ${time}</div>
+        <div class="msg-bubble">${m.text}</div>
+        ${isAdmin ? `<div style="margin-top:4px;">
+          <button onclick="deleteMsg('${doc.id}')" style="font-size:11px; padding:3px 8px;">Löschen</button>
+          ${m.user !== "Admin" ? `<button onclick="kickUser('${m.user}')" style="font-size:11px; padding:3px 8px;">Sperren</button>` : ''}
+        </div>` : ''}
+      `;
+      container.appendChild(div);
     });
+    container.scrollTop = container.scrollHeight;
+  });
 }
 
 async function sendMessage() {
-  const input = document.getElementById('chat-input');
+  const input = document.getElementById("chat-input");
   const text = input.value.trim();
   if (!text) return;
   
-  try {
-    await db.collection('messages').add({
-      user: currentUser,
-      text: text,
-      time: Date.now()
-    });
-    input.value = '';
-  } catch(e) {
-    alert("Fehler beim Senden: " + e.message);
+  await db.collection("messages").add({ user: currentUser, text: text, time: Date.now() });
+  input.value = "";
+}
+
+async function deleteMsg(id) {
+  if (confirm("Nachricht löschen?")) await db.collection("messages").doc(id).delete();
+}
+
+async function kickUser(name) {
+  if (confirm(`User "${name}" sperren?`)) {
+    await db.collection("banned").doc("list").set({
+      users: firebase.firestore.FieldValue.arrayUnion(name)
+    }, { merge: true });
   }
 }
 
-function handleKey(e) {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
+function confirmClearAll() {
+  if (confirm("Wirklich ALLE Nachrichten löschen?")) {
+    db.collection("messages").get().then(s => s.forEach(d => d.ref.delete()));
   }
 }
 
-// Start
-window.onload = () => checkPin();
+function logout() {
+  if (unsubscribe) unsubscribe();
+  location.reload();
+}
+
+// Starte mit PIN
+window.onload = () => {
+  const enteredPin = prompt("PIN eingeben:");
+  if (enteredPin === "6969" || enteredPin === "6767" || enteredPin === "7676") {
+    isAdmin = (enteredPin !== "6969");
+    currentUser = isAdmin ? "Admin" : prompt("Dein Name eingeben:");
+    document.getElementById("pin-screen").classList.add("hidden");
+    document.getElementById("chat-screen").classList.remove("hidden");
+    initChat();
+  } else {
+    alert("Falscher PIN");
+    location.reload();
+  }
+};
 </script>
 </body>
 </html>
