@@ -13,52 +13,104 @@
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); height:100vh; overflow:hidden; }
-  
+
   .chat-screen { display:flex; flex-direction:column; height:100vh; }
-  .chat-header { background:var(--surface); padding:14px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
-  .messages-container { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; background:var(--bg); }
+  .chat-header { background:var(--surface); padding:12px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); font-size:15px; }
   
-  .msg { max-width:88%; }
-  .msg.own { align-self:flex-end; }
-  .msg.other { align-self:flex-start; }
-  .msg-bubble { padding:13px 17px; border-radius:18px; font-size:15.5px; line-height:1.45; word-break:break-word; }
-  .msg.other .msg-bubble { background:var(--surface2); border:1px solid var(--border); border-bottom-left-radius:6px; }
-  .msg.own .msg-bubble { background:linear-gradient(135deg,#1a3a2a,#0f2a1a); border:1px solid rgba(0,255,136,0.4); border-bottom-right-radius:6px; }
+  .messages-container { 
+    flex:1; 
+    overflow-y:auto; 
+    padding:16px; 
+    display:flex; 
+    flex-direction:column; 
+    gap:12px; 
+    background:var(--bg); 
+    max-width: 720px; 
+    margin: 0 auto; 
+    width: 100%;
+  }
   
-  .chat-input-area { background:var(--surface); border-top:1px solid var(--border); padding:12px 16px; display:flex; gap:10px; }
-  .chat-input { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:16px; color:var(--text); padding:14px 18px; font-size:16px; resize:none; max-height:160px; }
-  .send-btn { background:var(--accent); color:#000; width:52px; height:52px; border-radius:16px; font-size:22px; }
+  .msg { max-width: 82%; }
+  .msg.own { align-self: flex-end; }
+  .msg.other { align-self: flex-start; }
   
-  #iframe-container { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:100; display:none; flex-direction:column; }
-  #iframe-container iframe { flex:1; border:none; width:100%; height:100%; }
-  .iframe-header { padding:12px; background:#111; display:flex; justify-content:space-between; align-items:center; }
+  .msg-bubble { 
+    padding: 13px 17px; 
+    border-radius: 18px; 
+    font-size: 15.5px; 
+    line-height: 1.45; 
+    word-break: break-word; 
+  }
+  .msg.other .msg-bubble { background: var(--surface2); border: 1px solid var(--border); border-bottom-left-radius: 6px; }
+  .msg.own .msg-bubble { background: linear-gradient(135deg, #1a3a2a, #0f2a1a); border: 1px solid rgba(0,255,136,0.4); border-bottom-right-radius: 6px; }
+  
+  .chat-input-area { 
+    background: var(--surface); 
+    border-top: 1px solid var(--border); 
+    padding: 12px 16px; 
+    display: flex; 
+    gap: 10px; 
+    max-width: 720px; 
+    margin: 0 auto; 
+    width: 100%;
+  }
+  .chat-input { 
+    flex: 1; 
+    background: var(--surface2); 
+    border: 1px solid var(--border); 
+    border-radius: 16px; 
+    color: var(--text); 
+    padding: 14px 18px; 
+    font-size: 16px; 
+    resize: none; 
+    max-height: 160px; 
+  }
+  .send-btn { 
+    background: var(--accent); 
+    color: #000; 
+    width: 52px; 
+    height: 52px; 
+    border-radius: 16px; 
+    font-size: 22px; 
+  }
+
+  #iframe-container { 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(0,0,0,0.96); 
+    z-index: 100; 
+    display: none; 
+    flex-direction: column; 
+  }
+  #iframe-container iframe { flex: 1; border: none; }
+  .iframe-header { padding: 12px 16px; background: #111; display: flex; justify-content: space-between; align-items: center; }
 </style>
 </head>
 <body>
 
 <div class="chat-screen" id="chat-screen">
   <div class="chat-header">
-    <div><strong>GlobalChat</strong> <span style="color:#00ff88">● Live</span></div>
-    <div>
-      <span id="display-user"></span>
-      <button onclick="logout()" style="margin-left:12px; background:#222; border:none; color:#aaa; padding:6px 12px; border-radius:8px;">Abmelden</button>
-      <button id="admin-clear" onclick="confirmClearAll()" style="display:none; margin-left:8px; background:#ff3366; color:white; border:none; padding:6px 12px; border-radius:8px;">Alles löschen</button>
+    <div><strong>GlobalChat</strong> <span style="color:#00ff88">●</span></div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span id="display-user" style="font-size:14px;"></span>
+      <button onclick="logout()" style="background:#222; border:none; color:#aaa; padding:5px 11px; border-radius:8px; font-size:13px;">Abmelden</button>
+      <button id="admin-clear" onclick="confirmClearAll()" style="display:none; background:#ff3366; color:white; border:none; padding:5px 11px; border-radius:8px; font-size:13px;">Alles löschen</button>
     </div>
   </div>
   
   <div class="messages-container" id="messages"></div>
   
   <div class="chat-input-area">
-    <textarea id="chat-input" class="chat-input" placeholder="Nachricht schreiben... (/my, /mj, /clear)" onkeydown="handleKey(event)"></textarea>
+    <textarea id="chat-input" class="chat-input" placeholder="Nachricht... (/my, /mj)" onkeydown="handleKey(event)"></textarea>
     <button class="send-btn" onclick="sendMessage()">➤</button>
   </div>
 </div>
 
-<!-- iFrame Overlay -->
+<!-- iFrame -->
 <div id="iframe-container">
   <div class="iframe-header">
     <span id="iframe-title">My Instance</span>
-    <button onclick="closeIframe()" style="background:#ff3366; color:white; border:none; padding:8px 14px; border-radius:8px;">Schließen ✕</button>
+    <button onclick="closeIframe()" style="background:#ff3366; color:white; border:none; padding:8px 16px; border-radius:8px;">Schließen ✕</button>
   </div>
   <iframe id="main-iframe" src=""></iframe>
 </div>
@@ -67,7 +119,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
 <script>
-// === DEINE FIREBASE CONFIG ===
+// Deine Config
 const firebaseConfig = {
   apiKey: "AIzaSyBYcwvQazKQxBQjdWqn4wLY-3SA3A4scng",
   authDomain: "globalchat-2026.firebaseapp.com",
@@ -82,17 +134,14 @@ const db = firebase.firestore();
 
 let currentUser = "", isAdmin = false, unsubscribe = null;
 
-// Slash Commands Konfiguration
 const slashCommands = {
-  "/my": { url: "https://www.myinstants.com/de/index/de/", title: "My Instance" },     // ← Hier deine Seite eintragen
-  "/mj": { url: "https://www.myinstants.com/de/index/de/", title: "Midjourney" },
-  "/clear": { action: "clear" }
+  "/my": { url: "https://www.myinstants.com/de/index/de/" },   // ← Hier deine URL eintragen
+  "/mj": { url: "https://www.myinstants.com/de/index/de/", title: "Midjourney" }
 };
 
-// Chat starten
 window.onload = () => {
-  const pin = prompt("PIN eingeben:");
-  if (!["6969", "6767", "7676"].includes(pin)) {
+  const pin = prompt("PIN eingeben (6969):");
+  if (!["6969","6767","7676"].includes(pin)) {
     alert("Falscher PIN");
     location.reload();
     return;
@@ -101,8 +150,8 @@ window.onload = () => {
   isAdmin = pin !== "6969";
   currentUser = isAdmin ? "Admin" : prompt("Dein Name:");
   
-  document.getElementById("display-user").innerHTML = isAdmin ? "👑 Admin" : currentUser;
-  document.getElementById("admin-clear").style.display = isAdmin ? "inline" : "none";
+  document.getElementById("display-user").textContent = isAdmin ? "👑 Admin" : currentUser;
+  document.getElementById("admin-clear").style.display = isAdmin ? "block" : "none";
   
   initChat();
 };
@@ -119,14 +168,9 @@ async function initChat() {
       const time = new Date(m.time).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
       
       div.innerHTML = `
-        <div style="font-size:12px;opacity:0.7;margin-bottom:4px;">${m.user} • ${time}</div>
+        <div style="font-size:12.5px; opacity:0.75; margin-bottom:4px;">${m.user} • ${time}</div>
         <div class="msg-bubble">${m.text}</div>
       `;
-      if (isAdmin) {
-        div.innerHTML += `<div style="margin-top:4px;font-size:11px;">
-          <button onclick="deleteMsg('${doc.id}')" style="background:#333;color:#ff3366">Löschen</button>
-        </div>`;
-      }
       container.appendChild(div);
     });
     container.scrollTop = container.scrollHeight;
@@ -138,28 +182,15 @@ async function sendMessage() {
   let text = input.value.trim();
   if (!text) return;
 
-  // Slash Command prüfen
   const cmd = text.toLowerCase().split(" ")[0];
   if (slashCommands[cmd]) {
-    const command = slashCommands[cmd];
-    
-    if (command.action === "clear") {
-      if (isAdmin && confirm("Chat wirklich leeren?")) {
-        db.collection("messages").get().then(s => s.forEach(d => d.ref.delete()));
-      }
-    } else if (command.url) {
-      openIframe(command.url, command.title);
-    }
+    const c = slashCommands[cmd];
+    if (c.url) openIframe(c.url, c.title);
     input.value = "";
     return;
   }
 
-  // Normale Nachricht
-  await db.collection("messages").add({
-    user: currentUser,
-    text: text,
-    time: Date.now()
-  });
+  await db.collection("messages").add({ user: currentUser, text: text, time: Date.now() });
   input.value = "";
 }
 
@@ -174,10 +205,6 @@ function closeIframe() {
   document.getElementById("main-iframe").src = "";
 }
 
-function deleteMsg(id) {
-  if (confirm("Nachricht löschen?")) db.collection("messages").doc(id).delete();
-}
-
 function handleKey(e) {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -186,12 +213,6 @@ function handleKey(e) {
 }
 
 function logout() { location.reload(); }
-
-function confirmClearAll() {
-  if (confirm("Wirklich ALLE Nachrichten löschen?")) {
-    db.collection("messages").get().then(s => s.forEach(d => d.ref.delete()));
-  }
-}
 </script>
 </body>
 </html>
