@@ -18,84 +18,39 @@
   .chat-header { background:var(--surface); padding:12px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
  
   .messages-container {
-    flex:1;
-    overflow-y: auto;
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    background:var(--bg);
-    max-width: 680px;
-    margin: 0 auto;
-    width: 100%;
-    scroll-behavior: smooth;
+    flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px;
+    background:var(--bg); max-width:680px; margin:0 auto; width:100%; scroll-behavior:smooth;
   }
  
-  .msg { max-width: 82%; }
-  .msg.own { align-self: flex-end; }
-  .msg.other { align-self: flex-start; }
+  .msg { max-width:82%; }
+  .msg.own { align-self:flex-end; }
+  .msg.other { align-self:flex-start; }
  
   .msg-bubble {
-    padding: 13px 17px;
-    border-radius: 18px;
-    font-size: 15.5px;
-    line-height: 1.45;
-    word-break: break-word;
+    padding:13px 17px; border-radius:18px; font-size:15.5px; line-height:1.45; word-break:break-word;
   }
-  .msg.other .msg-bubble { background: var(--surface2); border: 1px solid var(--border); border-bottom-left-radius: 6px; }
-  .msg.own .msg-bubble { background: linear-gradient(135deg, #1a3a2a, #0f2a1a); border: 1px solid rgba(0,255,136,0.4); border-bottom-right-radius: 6px; }
- 
+  .msg.other .msg-bubble { background:var(--surface2); border:1px solid var(--border); border-bottom-left-radius:6px; }
+  .msg.own .msg-bubble { background:linear-gradient(135deg,#1a3a2a,#0f2a1a); border:1px solid rgba(0,255,136,0.4); border-bottom-right-radius:6px; }
+
   .chat-input-area {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 12px 16px;
-    display: flex;
-    gap: 10px;
-    max-width: 680px;
-    margin: 0 auto;
-    width: 100%;
+    background:var(--surface); border-top:1px solid var(--border); padding:12px 16px;
+    display:flex; gap:10px; max-width:680px; margin:0 auto; width:100%;
   }
   .chat-input {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    color: var(--text);
-    padding: 14px 18px;
-    font-size: 16px;
-    resize: none;
-    max-height: 160px;
+    flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:16px;
+    color:var(--text); padding:14px 18px; font-size:16px; resize:none; max-height:160px;
   }
   .send-btn {
-    background: var(--accent);
-    color: #000;
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    font-size: 22px;
+    background:var(--accent); color:#000; width:52px; height:52px; border-radius:16px; font-size:22px;
   }
 
-  /* iFrame für /my */
   #iframe-container {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.97);
-    z-index: 100;
-    display: none;
-    flex-direction: column;
+    position:fixed; inset:0; background:rgba(0,0,0,0.97); z-index:100; display:none; flex-direction:column;
   }
   .iframe-header {
-    padding: 12px 16px;
-    background: #111;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding:12px 16px; background:#111; display:flex; justify-content:space-between; align-items:center;
   }
-  #main-iframe {
-    flex: 1;
-    border: none;
-    width: 100%;
-  }
+  #main-iframe { flex:1; border:none; width:100%; }
 </style>
 </head>
 <body>
@@ -113,12 +68,12 @@
   <div class="messages-container" id="messages"></div>
  
   <div class="chat-input-area">
-    <textarea id="chat-input" class="chat-input" placeholder="Nachricht schreiben... (/my)" onkeydown="handleKey(event)"></textarea>
+    <textarea id="chat-input" class="chat-input" placeholder="Nachricht... (/my oder /sr)" onkeydown="handleKey(event)"></textarea>
     <button class="send-btn" onclick="sendMessage()">➤</button>
   </div>
 </div>
 
-<!-- iFrame Overlay für /my -->
+<!-- iFrame Overlay -->
 <div id="iframe-container">
   <div class="iframe-header">
     <span id="iframe-title">My Instance</span>
@@ -146,17 +101,9 @@ const db = firebase.firestore();
 
 let currentUser = "", isAdmin = false, unsubscribe = null;
 
-// Slash Commands
-const slashCommands = {
-  "/my": { url: "https://www.myinstants.com/de/index/de/", title: "My Instance" }   // ← HIER DEINEN LINK EINTRAGEN!
-};
-
 window.onload = () => {
   const pin = prompt("PIN eingeben:");
-  if (pin === null || pin.length === 0) {
-    location.reload();
-    return;
-  }
+  if (!pin) { location.reload(); return; }
  
   isAdmin = (pin === "6767" || pin === "7676");
   currentUser = isAdmin ? "Admin" : prompt("Dein Name:");
@@ -171,17 +118,12 @@ async function initChat() {
   unsubscribe = db.collection("messages").orderBy("time", "asc").onSnapshot(snap => {
     const container = document.getElementById("messages");
     container.innerHTML = "";
-   
     snap.forEach(doc => {
       const m = doc.data();
       const div = document.createElement("div");
       div.className = `msg ${m.user === currentUser ? "own" : "other"}`;
       const time = new Date(m.time).toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'});
-     
-      div.innerHTML = `
-        <div style="font-size:12.5px; opacity:0.75; margin-bottom:4px;">${m.user} • ${time}</div>
-        <div class="msg-bubble">${m.text}</div>
-      `;
+      div.innerHTML = `<div style="font-size:12.5px; opacity:0.75; margin-bottom:4px;">${m.user} • ${time}</div><div class="msg-bubble">${m.text}</div>`;
       container.appendChild(div);
     });
     container.scrollTop = container.scrollHeight;
@@ -193,21 +135,24 @@ async function sendMessage() {
   let text = input.value.trim();
   if (!text) return;
 
-  // Slash Command prüfen
-  const command = text.toLowerCase().trim();
-  if (slashCommands[command]) {
-    const cmd = slashCommands[command];
-    openIframe(cmd.url, cmd.title);
+  const lower = text.toLowerCase().trim();
+
+  // /my Befehl
+  if (lower === "/my") {
+    openIframe("https://www.myinstants.com/de/index/de/", "My Instants");
+    input.value = "";
+    return;
+  }
+
+  // /sr Befehl (YouTube)
+  if (lower.startsWith("/sr")) {
+    openIframe("https://www.youtube.com/watch?v=QuKfTVc4Og4", "YouTube Video");
     input.value = "";
     return;
   }
 
   // Normale Nachricht
-  await db.collection("messages").add({
-    user: currentUser,
-    text: text,
-    time: Date.now()
-  });
+  await db.collection("messages").add({ user: currentUser, text: text, time: Date.now() });
   input.value = "";
 }
 
