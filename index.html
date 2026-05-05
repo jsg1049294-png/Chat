@@ -48,6 +48,7 @@
 </style>
 </head>
 <body>
+
 <div class="chat-screen" id="chat-screen">
   <div class="chat-header">
     <div><strong>GlobalChat</strong> <span style="color:#00ff88">● Live</span></div>
@@ -91,7 +92,7 @@ const db = firebase.firestore();
 
 let currentUser = "", isAdmin = false, unsubscribe = null;
 
-// === YouTube Videos (hier kannst du beliebig viele hinzufügen) ===
+// === YouTube Videos ===
 const youtubeVideos = {
   1: { id: "q7c05ejJ6Sw", title: "YouTube Video 1" },
   2: { id: "dQw4w9wgxcq", title: "Rick Astley" },
@@ -102,16 +103,55 @@ const youtubeVideos = {
 };
 
 window.onload = () => {
-  const pin = prompt("PIN eingeben:");
-  if (!pin) { location.reload(); return; }
-  
-  isAdmin = (pin === "6767" || pin === "7676");
-  currentUser = isAdmin ? "Admin" : prompt("Dein Name:");
-  
-  document.getElementById("display-user").textContent = isAdmin ? "👑 Admin" : currentUser;
-  document.getElementById("admin-clear").style.display = isAdmin ? "block" : "none";
-  
-  initChat();
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    function askForPin() {
+        const pin = prompt("PIN eingeben:");
+
+        if (!pin) {
+            alert("PIN ist erforderlich!");
+            location.reload();
+            return;
+        }
+
+        if (pin === "6969") {
+            // Normaler User
+            isAdmin = false;
+            currentUser = prompt("Dein Name:") || "User" + Math.floor(Math.random()*1000);
+            document.getElementById("display-user").textContent = currentUser;
+            document.getElementById("admin-clear").style.display = "none";
+            initChat();
+
+        } else if (pin === "6767" || pin === "7676") {
+            // Admin
+            isAdmin = true;
+            currentUser = "Admin";
+            document.getElementById("display-user").textContent = "👑 Admin";
+            document.getElementById("admin-clear").style.display = "block";
+            initChat();
+
+        } else {
+            // Falscher PIN
+            attempts++;
+            if (attempts >= maxAttempts) {
+                alert("Zu viele falsche Versuche. Zugriff verweigert.");
+                document.body.innerHTML = `
+                    <div style="height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0a0f;color:#ff3366;font-size:24px;text-align:center;padding:20px;">
+                        <div>
+                            <h1>🚫 Zugriff verweigert</h1>
+                            <p>Falscher PIN.</p>
+                            <button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;font-size:16px;">Neu versuchen</button>
+                        </div>
+                    </div>`;
+            } else {
+                alert(`Falscher PIN! Versuch ${attempts}/${maxAttempts}`);
+                askForPin(); // erneut fragen
+            }
+        }
+    }
+
+    askForPin();
 };
 
 async function initChat() {
@@ -144,31 +184,28 @@ async function sendMessage() {
     return;
   }
 
-  // /sr Befehl für YouTube Videos
+  // /sr Befehl
   if (lower.startsWith("/sr")) {
     const parts = text.split(/\s+/);
-    let num = 1; // Standard = Video 1
-
+    let num = 1;
     if (parts.length > 1) {
       const parsed = parseInt(parts[1]);
       if (!isNaN(parsed) && youtubeVideos[parsed]) {
         num = parsed;
       }
     }
-
     const video = youtubeVideos[num];
     const embedUrl = `https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0`;
-
     openIframe(embedUrl, video.title);
     input.value = "";
     return;
   }
 
   // Normale Nachricht
-  await db.collection("messages").add({ 
-    user: currentUser, 
-    text: text, 
-    time: Date.now() 
+  await db.collection("messages").add({
+    user: currentUser,
+    text: text,
+    time: Date.now()
   });
   input.value = "";
 }
