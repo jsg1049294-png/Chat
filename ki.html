@@ -26,9 +26,9 @@
 </div>
 
 <script>
-// ================== GITHUB SECRET WIRD HIER EINGESETZT ==================
-const API_KEY = "{{KEY}}";   // ← Dieser Platzhalter wird automatisch ersetzt
-// =====================================================================
+// ================== GITHUB SECRET {{KEY}} ==================
+const API_KEY = "{{KEY}}";
+// ========================================================
 
 const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("user-input");
@@ -45,8 +45,8 @@ async function sendToAI() {
   const text = input.value.trim();
   if (!text) return;
 
-  if (API_KEY.includes("{{") || API_KEY.length < 30) {
-    addMessage("❌ API-Key wurde noh nicht eingesetzt. Deploy mit GitHub Actions.", "ai");
+  if (API_KEY === "{{KEY}}" || API_KEY.length < 20) {
+    addMessage("❌ API-Key wurde noch nicht eingesetzt.\nDeploye über GitHub Actions.", "ai");
     return;
   }
 
@@ -80,12 +80,12 @@ async function sendToAI() {
 
   } catch (e) {
     loading.remove();
-    addMessage("❌ Verbindungsfehler zur KI.", "ai");
+    addMessage("❌ Fehler: API-Key ungültig oder Verbindung fehlgeschlagen.", "ai");
   }
 }
 
 input.addEventListener("keypress", e => { if (e.key === "Enter") sendToAI(); });
-addMessage("Hallo! Ich bin bereit.", "ai");
+addMessage("Hallo! Ich bin bereit. Wie kann ich dir helfen?", "ai");
 </script>
 </body>
 </html>
