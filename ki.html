@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>KI Assistant</title>
+<style>
+  body { margin:0; padding:0; background:#0a0a0f; color:#e8e8f0; font-family: 'Syne', system-ui; height:100vh; overflow:hidden; }
+  #chat { display:flex; flex-direction:column; height:100vh; }
+  #messages { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
+  .bubble { max-width:80%; padding:14px 18px; border-radius:18px; line-height:1.5; }
+  .user { align-self:flex-end; background:#00ff88; color:#000; border-bottom-right-radius:6px; }
+  .ai { align-self:flex-start; background:#1a1a26; border:1px solid #333; border-bottom-left-radius:6px; }
+  #input-area { padding:15px; background:#111; display:flex; gap:10px; }
+  #user-input { flex:1; padding:14px; border-radius:12px; border:none; background:#222; color:white; font-size:16px; }
+  button { padding:0 20px; background:#00ff88; color:black; border:none; border-radius:12px; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<div id="chat">
+  <div id="messages"></div>
+  <div id="input-area">
+    <input id="user-input" placeholder="Schreibe hier... (Enter zum Senden)" autocomplete="off">
+    <button onclick="sendToAI()">Senden</button>
+  </div>
+</div>
+
+<script>
+// ================== HIER DEINEN API-KEY EINFÜGEN ==================
+const API_KEY = "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";  // ← Dein Key hier
+const MODEL = "gpt-4o-mini";   // z.B. gpt-4o, gpt-4o-mini, claude-3-5-sonnet-20240620
+// =================================================================
+
+const messagesDiv = document.getElementById("messages");
+const input = document.getElementById("user-input");
+
+function addMessage(text, type) {
+  const div = document.createElement("div");
+  div.className = `bubble ${type}`;
+  div.textContent = text;
+  messagesDiv.appendChild(div);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+async function sendToAI() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage(text, "user");
+  input.value = "";
+
+  addMessage("Denke nach...", "ai");
+
+  try {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [{ role: "user", content: text }],
+        temperature: 0.8
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.choices[0].message.content;
+    
+    messagesDiv.lastChild.remove(); // Lade-Anzeige entfernen
+    addMessage(reply, "ai");
+
+  } catch (e) {
+    messagesDiv.lastChild.remove();
+    addMessage("Fehler: API-Key ungültig oder Verbindung fehlgeschlagen.", "ai");
+  }
+}
+
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendToAI();
+});
+</script>
+</body>
+</html>
