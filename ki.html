@@ -46,7 +46,7 @@ async function sendToAI() {
   if (!text) return;
 
   if (API_KEY.includes("{{") || API_KEY.length < 30) {
-    addMessage("❌ API-Key wurde noch nicht eingesetzt. Deploy mit GitHub Actions.", "ai");
+    addMessage("❌ API-Key wurde noh nicht eingesetzt. Deploy mit GitHub Actions.", "ai");
     return;
   }
 
