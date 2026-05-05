@@ -13,25 +13,20 @@
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); height:100vh; overflow:hidden; }
-
   .chat-screen { display:flex; flex-direction:column; height:100vh; }
   .chat-header { background:var(--surface); padding:12px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); }
- 
   .messages-container {
     flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px;
     background:var(--bg); max-width:680px; margin:0 auto; width:100%; scroll-behavior:smooth;
   }
- 
   .msg { max-width:82%; }
   .msg.own { align-self:flex-end; }
   .msg.other { align-self:flex-start; }
- 
   .msg-bubble {
     padding:13px 17px; border-radius:18px; font-size:15.5px; line-height:1.45; word-break:break-word;
   }
   .msg.other .msg-bubble { background:var(--surface2); border:1px solid var(--border); border-bottom-left-radius:6px; }
   .msg.own .msg-bubble { background:linear-gradient(135deg,#1a3a2a,#0f2a1a); border:1px solid rgba(0,255,136,0.4); border-bottom-right-radius:6px; }
-
   .chat-input-area {
     background:var(--surface); border-top:1px solid var(--border); padding:12px 16px;
     display:flex; gap:10px; max-width:680px; margin:0 auto; width:100%;
@@ -43,7 +38,6 @@
   .send-btn {
     background:var(--accent); color:#000; width:52px; height:52px; border-radius:16px; font-size:22px;
   }
-
   #iframe-container {
     position:fixed; inset:0; background:rgba(0,0,0,0.97); z-index:100; display:none; flex-direction:column;
   }
@@ -54,7 +48,6 @@
 </style>
 </head>
 <body>
-
 <div class="chat-screen" id="chat-screen">
   <div class="chat-header">
     <div><strong>GlobalChat</strong> <span style="color:#00ff88">● Live</span></div>
@@ -64,11 +57,9 @@
       <button id="admin-clear" onclick="confirmClearAll()" style="display:none; background:#ff3366; color:white; border:none; padding:6px 12px; border-radius:8px; font-size:13px;">Alles löschen</button>
     </div>
   </div>
- 
   <div class="messages-container" id="messages"></div>
- 
   <div class="chat-input-area">
-    <textarea id="chat-input" class="chat-input" placeholder="Nachricht... (/my oder /sr)" onkeydown="handleKey(event)"></textarea>
+    <textarea id="chat-input" class="chat-input" placeholder="Nachricht... (/my oder /sr 1-6)" onkeydown="handleKey(event)"></textarea>
     <button class="send-btn" onclick="sendMessage()">➤</button>
   </div>
 </div>
@@ -76,7 +67,7 @@
 <!-- iFrame Overlay -->
 <div id="iframe-container">
   <div class="iframe-header">
-    <span id="iframe-title">My Instance</span>
+    <span id="iframe-title">Video</span>
     <button onclick="closeIframe()" style="background:#ff3366; color:white; border:none; padding:8px 16px; border-radius:8px;">Schließen ✕</button>
   </div>
   <iframe id="main-iframe" src=""></iframe>
@@ -84,7 +75,6 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-
 <script>
 // === Firebase Config ===
 const firebaseConfig = {
@@ -101,16 +91,26 @@ const db = firebase.firestore();
 
 let currentUser = "", isAdmin = false, unsubscribe = null;
 
+// === YouTube Videos (hier kannst du beliebig viele hinzufügen) ===
+const youtubeVideos = {
+  1: { id: "q7c05ejJ6Sw", title: "YouTube Video 1" },
+  2: { id: "dQw4w9wgxcq", title: "Rick Astley" },
+  3: { id: "DEIN_VIDEO_ID_3", title: "Video 3" },
+  4: { id: "DEIN_VIDEO_ID_4", title: "Video 4" },
+  5: { id: "DEIN_VIDEO_ID_5", title: "Video 5" },
+  6: { id: "DEIN_VIDEO_ID_6", title: "Video 6" }
+};
+
 window.onload = () => {
   const pin = prompt("PIN eingeben:");
   if (!pin) { location.reload(); return; }
- 
+  
   isAdmin = (pin === "6767" || pin === "7676");
   currentUser = isAdmin ? "Admin" : prompt("Dein Name:");
- 
+  
   document.getElementById("display-user").textContent = isAdmin ? "👑 Admin" : currentUser;
   document.getElementById("admin-clear").style.display = isAdmin ? "block" : "none";
- 
+  
   initChat();
 };
 
@@ -144,15 +144,32 @@ async function sendMessage() {
     return;
   }
 
-  // /sr Befehl (YouTube)
+  // /sr Befehl für YouTube Videos
   if (lower.startsWith("/sr")) {
-    openIframe("https://www.youtube.com/embed/q7c05ejJ6Sw", "YouTube Video");
+    const parts = text.split(/\s+/);
+    let num = 1; // Standard = Video 1
+
+    if (parts.length > 1) {
+      const parsed = parseInt(parts[1]);
+      if (!isNaN(parsed) && youtubeVideos[parsed]) {
+        num = parsed;
+      }
+    }
+
+    const video = youtubeVideos[num];
+    const embedUrl = `https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0`;
+
+    openIframe(embedUrl, video.title);
     input.value = "";
     return;
   }
 
   // Normale Nachricht
-  await db.collection("messages").add({ user: currentUser, text: text, time: Date.now() });
+  await db.collection("messages").add({ 
+    user: currentUser, 
+    text: text, 
+    time: Date.now() 
+  });
   input.value = "";
 }
 
