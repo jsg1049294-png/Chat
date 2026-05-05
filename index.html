@@ -60,7 +60,7 @@
   </div>
   <div class="messages-container" id="messages"></div>
   <div class="chat-input-area">
-    <textarea id="chat-input" class="chat-input" placeholder="Nachricht... (/my oder /sr 1-6)" onkeydown="handleKey(event)"></textarea>
+    <textarea id="chat-input" class="chat-input" placeholder="Nachricht... (/my | /sr 1-6 | /ki)" onkeydown="handleKey(event)"></textarea>
     <button class="send-btn" onclick="sendMessage()">➤</button>
   </div>
 </div>
@@ -68,7 +68,7 @@
 <!-- iFrame Overlay -->
 <div id="iframe-container">
   <div class="iframe-header">
-    <span id="iframe-title">Video</span>
+    <span id="iframe-title">KI Chat</span>
     <button onclick="closeIframe()" style="background:#ff3366; color:white; border:none; padding:8px 16px; border-radius:8px;">Schließen ✕</button>
   </div>
   <iframe id="main-iframe" src=""></iframe>
@@ -90,7 +90,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-let currentUser = "", isAdmin = false, unsubscribe = null;
+let currentUser = "", isAdmin = false;
 
 // === YouTube Videos ===
 const youtubeVideos = {
@@ -116,7 +116,6 @@ window.onload = () => {
         }
 
         if (pin === "6969") {
-            // Normaler User
             isAdmin = false;
             currentUser = prompt("Dein Name:") || "User" + Math.floor(Math.random()*1000);
             document.getElementById("display-user").textContent = currentUser;
@@ -124,7 +123,6 @@ window.onload = () => {
             initChat();
 
         } else if (pin === "6767" || pin === "7676") {
-            // Admin
             isAdmin = true;
             currentUser = "Admin";
             document.getElementById("display-user").textContent = "👑 Admin";
@@ -132,30 +130,21 @@ window.onload = () => {
             initChat();
 
         } else {
-            // Falscher PIN
             attempts++;
             if (attempts >= maxAttempts) {
                 alert("Zu viele falsche Versuche. Zugriff verweigert.");
-                document.body.innerHTML = `
-                    <div style="height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0a0f;color:#ff3366;font-size:24px;text-align:center;padding:20px;">
-                        <div>
-                            <h1>🚫 Zugriff verweigert</h1>
-                            <p>Falscher PIN.</p>
-                            <button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;font-size:16px;">Neu versuchen</button>
-                        </div>
-                    </div>`;
+                document.body.innerHTML = `<div style="height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0a0f;color:#ff3366;font-size:24px;text-align:center;padding:20px;"><div><h1>🚫 Zugriff verweigert</h1><p>Falscher PIN.</p><button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;font-size:16px;">Neu versuchen</button></div></div>`;
             } else {
                 alert(`Falscher PIN! Versuch ${attempts}/${maxAttempts}`);
-                askForPin(); // erneut fragen
+                askForPin();
             }
         }
     }
-
     askForPin();
 };
 
 async function initChat() {
-  unsubscribe = db.collection("messages").orderBy("time", "asc").onSnapshot(snap => {
+  db.collection("messages").orderBy("time", "asc").onSnapshot(snap => {
     const container = document.getElementById("messages");
     container.innerHTML = "";
     snap.forEach(doc => {
@@ -177,26 +166,27 @@ async function sendMessage() {
 
   const lower = text.toLowerCase().trim();
 
-  // /my Befehl
   if (lower === "/my") {
     openIframe("https://www.myinstants.com/de/index/de/", "My Instants");
     input.value = "";
     return;
   }
 
-  // /sr Befehl
   if (lower.startsWith("/sr")) {
     const parts = text.split(/\s+/);
     let num = 1;
     if (parts.length > 1) {
       const parsed = parseInt(parts[1]);
-      if (!isNaN(parsed) && youtubeVideos[parsed]) {
-        num = parsed;
-      }
+      if (!isNaN(parsed) && youtubeVideos[parsed]) num = parsed;
     }
     const video = youtubeVideos[num];
-    const embedUrl = `https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0`;
-    openIframe(embedUrl, video.title);
+    openIframe(`https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0`, video.title);
+    input.value = "";
+    return;
+  }
+
+  if (lower === "/ki") {
+    openIframe("ki.html", "KI Assistant");
     input.value = "";
     return;
   }
