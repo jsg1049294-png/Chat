@@ -26,9 +26,9 @@
 </div>
 
 <script>
-// ================== HIER DEINEN OPENROUTER KEY EINFÜGEN ==================
-const API_KEY = "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";   // ← Hier deinen OpenRouter Key eintragen!
-// =====================================================================
+// ================== OPENROUTER API KEY ==================
+const API_KEY = "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";   // ←←← HIER deinen OpenRouter Key eintragen!
+// =======================================================
 
 const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("user-input");
@@ -45,8 +45,8 @@ async function sendToAI() {
   const text = input.value.trim();
   if (!text) return;
 
-  if (API_KEY.length < 20) {
-    addMessage("❌ Bitte zuerst deinen OpenRouter API-Key in ki.html eintragen!", "ai");
+  if (API_KEY.length < 15) {
+    addMessage("❌ Bitte trage deinen OpenRouter Key oben in der ki.html ein!", "ai");
     return;
   }
 
@@ -64,11 +64,11 @@ async function sendToAI() {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${API_KEY}`,
-        "HTTP-Referer": "https://globalchat.com",
+        "HTTP-Referer": "https://globalchat.local",
         "X-Title": "GlobalChat"
       },
       body: JSON.stringify({
-        model: "openrouter/free",     // Kostenloses Modell
+        model: "google/gemini-2.0-flash-exp:free",   // Kostenloses gutes Modell
         messages: [{ role: "user", content: text }]
       })
     });
@@ -76,20 +76,21 @@ async function sendToAI() {
     const data = await res.json();
     loading.remove();
 
-    if (!res.ok) {
-      addMessage("❌ Fehler: " + (data.error?.message || "Ungültiger Key"), "ai");
-    } else {
+    if (data.choices && data.choices[0]) {
       addMessage(data.choices[0].message.content, "ai");
+    } else {
+      addMessage("❌ Fehler: " + (data.error?.message || "Unbekannter Fehler"), "ai");
     }
 
   } catch (e) {
     loading.remove();
-    addMessage("❌ Keine Verbindung möglich.", "ai");
+    addMessage("❌ Verbindungsfehler. Key korrekt eingetragen?", "ai");
+    console.error(e);
   }
 }
 
 input.addEventListener("keypress", e => { if (e.key === "Enter") sendToAI(); });
-addMessage("✅ OpenRouter KI geladen. Schreib mir etwas!", "ai");
+addMessage("✅ OpenRouter KI ist bereit! Schreib etwas.", "ai");
 </script>
 </body>
 </html>
